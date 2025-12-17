@@ -74,3 +74,17 @@ contrib/postprocessing/lethe_pyvista_tools.egg-info
 *__pycache__
 doc/doxygen/html/
 doc/doxygen/DoxygenWarningLog.txt
+platform/bin/dem_parameter_template
+platform/bin/lethe-fluid
+platform/bin/lethe-fluid-block
+platform/bin/lethe-fluid-matrix-free
+platform/bin/lethe-fluid-nitsche
+platform/bin/lethe-fluid-particles
+platform/bin/lethe-fluid-particles-matrix-free
+platform/bin/lethe-fluid-sharp
+platform/bin/lethe-fluid-vans
+platform/bin/lethe-fluid-vans-matrix-free
+platform/bin/lethe-parameter-check
+platform/bin/lethe-particles
+platform/bin/lethe-particles-ray-tracing
+platform/bin/navier_stokes_parameter_template
