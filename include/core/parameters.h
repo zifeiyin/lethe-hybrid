@@ -349,6 +349,21 @@ namespace Parameters
   };
 
   /**
+   * @brief Pure Ideal gas model to solve for isothermal weakly
+   * compressible fluid flows.
+   */
+  struct IdealGasDensityParameters
+  {
+    // Specific gas constant in J/kg/K
+    double R;
+
+    static void
+    declare_parameters(ParameterHandler &prm);
+    void
+    parse_parameters(ParameterHandler &prm, const Dimensionality &dimensions);
+  };
+
+  /**
    * @brief SurfaceTensionParameters - Defines parameters for surface tension
    * models
    */
@@ -479,9 +494,11 @@ namespace Parameters
     enum class DensityModel : std::int8_t
     {
       constant,
-      isothermal_ideal_gas
+      isothermal_ideal_gas,
+      ideal_gas
     } density_model;
     IsothermalIdealGasDensityParameters isothermal_ideal_gas_density_parameters;
+    IdealGasDensityParameters ideal_gas_density_parameters;
 
     enum class SpecificHeatModel : std::int8_t
     {

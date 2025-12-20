@@ -14,6 +14,12 @@ DensityModel::model_cast(const Parameters::Material &material_properties)
         material_properties.isothermal_ideal_gas_density_parameters.R,
         material_properties.isothermal_ideal_gas_density_parameters.T);
     }
+    else if (material_properties.density_model ==
+             Parameters::Material::DensityModel::ideal_gas)
+      {
+        return std::make_shared<DensityIdealGas>(
+          material_properties.ideal_gas_density_parameters.R);
+      }
 
   return std::make_shared<DensityConstant>(material_properties.density);
 }

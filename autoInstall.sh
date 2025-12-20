@@ -7,5 +7,5 @@ cd build
 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/saayzf/softwares/lethe-hybrid/platform
 
-make -j 4 
+make -j 12 
 make install

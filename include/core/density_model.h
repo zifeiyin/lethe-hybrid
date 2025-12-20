@@ -361,4 +361,177 @@ private:
   const double psi;
 };
 
+
+/**
+ * @brief Pure Ideal gas density.
+ *
+ * Isothermal ideal gas density assumes that the fluid's density varies
+ * according the following state equation:
+ *
+ */
+class DensityIdealGas : public DensityModel
+{
+public:
+  /**
+   * @brief Constructor of the isothermal ideal gas density model.
+   *
+   * @param[in] p_R Value of the specific gas constant \f$\left(R=\frac{R_u}{M}
+   * \right)\f$ with \f$R_u\f$ the universal gas constant and \f$M\f$ the molar
+   * mass of the gas.
+   */
+  DensityIdealGas(const double p_R)
+    : psi(1. / (p_R))
+  {
+    this->model_depends_on[field::pressure] = true;
+    this->model_depends_on[field::temperature] = true;
+  }
+
+  /**
+   * @brief Compute the density of the isothermal ideal gas.
+   *
+   * @param[in] field_values Values of the various fields on which the property
+   * may depend. In this case, the density depends on pressure. The map stores a
+   * single value per field.
+   *
+   * @return Value of the density computed with the @p field_values.
+   */
+  double
+  value(const std::map<field, double> &field_values) override
+  {
+    Assert(field_values.find(field::pressure) != field_values.end(),
+           PhysicialPropertyModelFieldUndefined("DensityIdealGas",
+                                                "pressure"));
+    Assert(field_values.find(field::temperature) != field_values.end(),
+           PhysicialPropertyModelFieldUndefined("DensityIdealGas",
+                                                "temperature"));
+    const double pressure = field_values.at(field::pressure);
+    const double temperature = field_values.at(field::temperature);
+    return psi * pressure / temperature;
+  }
+
+  /**
+   * @brief Compute a vector of density values for an isothermal ideal gas.
+   *
+   * @param[in] field_vectors Vectors of the fields on which the density may
+   * depend. In this case, the density depends on pressure. The map stores a
+   * vector of values per field.
+   *
+   * @param[out] property_vector Vectors of computed density values.
+   */
+  void
+  vector_value(const std::map<field, std::vector<double>> &field_vectors,
+               std::vector<double> &property_vector) override
+  {
+    Assert(field_vectors.find(field::pressure) != field_vectors.end(),
+           PhysicialPropertyModelFieldUndefined("DensityIdealGas",
+                                                "pressure"));
+    Assert(field_vectors.find(field::temperature) != field_vectors.end(),
+           PhysicialPropertyModelFieldUndefined("DensityIdealGas",
+                                                "temperature"));
+    const std::vector<double> &pressure = field_vectors.at(field::pressure);
+    const std::vector<double> &temperature = field_vectors.at(field::temperature);
+    for (unsigned int i = 0; i < property_vector.size(); ++i)
+      property_vector[i] = psi * pressure[i] / temperature[i];
+  }
+
+  /**
+   * @brief Compute the jacobian (the partial derivative) of the density with
+   * respect to a specified field.
+   *
+   * @param[in] field_values Values of the various fields on which the density
+   * may depend. The map stores a single value per field.
+   *
+   * @param[in] id Indicator of the field with respect to which the jacobian
+   * should be computed.
+   *
+   * @return Value of the derivative of the density with respect to the
+   * specified field.
+   */
+  double
+  jacobian(const std::map<field, double> &field_values, const field id) override
+  {
+    (void)field_values;
+    if (id == field::pressure)
+    {
+      const double temperature = field_values.at(field::temperature);
+      return psi / temperature;
+    }
+    else if (id == field::temperature)
+    {
+      const double pressure = field_values.at(field::pressure);
+      return -psi * pressure / (temperature * temperature);
+    }
+    else
+    {
+      return 0;
+    }
+  }
+
+  /**
+   * @brief Compute the derivative of the density with respect to a field for
+   * an isothermal ideal gas.
+   *
+   * @param[in] field_vectors Vector of values of the fields used to evaluate
+   * the density. The map stores a vector of values per field.
+   *
+   * @param[in] id Identifier of the field with respect to which a derivative
+   * should be computed.
+   *
+   * @param[out] jacobian_vector Vector of computed derivative values of the
+   * density
+   * with respect to the field of the specified @p id.
+   */
+  void
+  vector_jacobian(const std::map<field, std::vector<double>> &field_vectors,
+                  const field                                 id,
+                  std::vector<double> &jacobian_vector) override
+  {
+    (void)field_vectors;
+    if (id == field::pressure)
+    {
+      const std::vector<double> &temperature = field_vectors.at(field::temperature);
+      for (unsigned int i = 0; i < jacobian_vector.size(); ++i)
+        jacobian_vector[i] = psi / temperature[i];
+    }
+    else if (id == field::temperature)
+    {
+      const std::vector<double> &pressure = field_vectors.at(field::pressure);
+      const std::vector<double> &temperature = field_vectors.at(field::temperature);
+      for (unsigned int i = 0; i < jacobian_vector.size(); ++i)
+        jacobian_vector[i] = -psi * pressure[i] / (temperature[i] * temperature[i]);
+    }
+    else
+      std::fill(jacobian_vector.begin(), jacobian_vector.end(), 0);
+  }
+
+  /**
+   * @brief Get the value of the compressibility factor used in the density
+   * model.
+   *
+   * @return Value of the isothermal ideal gas compressibility factor.
+   */
+  double
+  get_psi() const override
+  {
+    return 0.0;
+  }
+
+  /**
+   * @brief Get the value of the reference state density used in the density
+   * model.
+   *
+   * @return Value of the reference state density, here the constant density
+   * value.
+   */
+  double
+  get_density_ref() const override
+  {
+    return 0.0;
+  }
+
+private:
+  /// Compressibility factor of the isothermal ideal gas at reference state
+  const double psi;
+};
+
 #endif
