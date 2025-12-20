@@ -1254,11 +1254,12 @@ namespace Parameters
 
       prm.declare_entry("density model",
                         "constant",
-                        Patterns::Selection("constant|isothermal_ideal_gas"),
+                        Patterns::Selection("constant|isothermal_ideal_gas|ideal_gas"),
                         "Model used for the calculation of the density"
-                        "Choices are <constant|isothermal_ideal_gas>.");
+                        "Choices are <constant|isothermal_ideal_gas|ideal_gas>.");
 
       isothermal_ideal_gas_density_parameters.declare_parameters(prm);
+      ideal_gas_density_parameters.declare_parameters(prm);
 
       prm.declare_entry("specific heat model",
                         "constant",
@@ -1373,10 +1374,15 @@ namespace Parameters
         {
           density_model = DensityModel::isothermal_ideal_gas;
         }
+      else if (op == "ideal_gas")
+        {
+          density_model = DensityModel::ideal_gas;
+        }
       density = prm.get_double("density");
       // Density is in M L^-3, rescale
       density *= dimensions.density_scaling;
       isothermal_ideal_gas_density_parameters.parse_parameters(prm, dimensions);
+      ideal_gas_density_parameters.parse_parameters(prm, dimensions);
 
       //---------------------------------------------------
       // Kinematic viscosity and Rheology
