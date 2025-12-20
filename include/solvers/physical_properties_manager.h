@@ -412,6 +412,18 @@ public:
     return constant_density;
   }
 
+  bool
+  density_is_isothermal_idealgas() const
+  {
+    return isothermal_idealgas_density;
+  }
+
+  bool
+  density_is_idealgas() const
+  {
+    return idealgas_density;
+  }
+
   Parameters::PhysicalProperties
   get_physical_properties_parameters() const
   {
@@ -522,6 +534,8 @@ private:
 
   bool non_newtonian_flow;
   bool constant_density;
+  bool isothermal_idealgas_density; 
+  bool idealgas_density;
   bool constant_surface_tension;
   bool phase_change;
   /*

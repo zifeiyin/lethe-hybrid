@@ -50,6 +50,8 @@ PhysicalPropertiesManager::initialize(
   non_newtonian_flow       = false;
   phase_change             = false;
   constant_density         = true;
+  idealgas_density         = false;
+  isothermal_idealgas_density = false;
   constant_surface_tension = true;
 
   required_fields[field::temperature]               = false;
@@ -73,6 +75,10 @@ PhysicalPropertiesManager::initialize(
       // if non-constant density is not implemented in a post-processing utility
       if (!density.back()->is_constant_density_model())
         constant_density = false;
+      if (density.back()->is_idealgas_density_model())
+        idealgas_density = true;
+      if (density.back()->is_isothermal_idealgas_density_model())
+        isothermal_idealgas_density = true;
 
       specific_heat.push_back(
         SpecificHeatModel::model_cast(physical_properties.fluids[f]));

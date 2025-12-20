@@ -112,6 +112,20 @@ public:
     std::vector<double>                        &property_vector) = 0;
 
   /**
+   * @brief Calculates the vector values of the dynamic viscosity.
+   * @param p_density_ref The density of the fluid at the reference state
+   * @param field_vectors Values of the field on which the dynamic viscosity may
+   * depend on.
+   * @param property_vector todo
+   */
+  virtual void
+  get_dynamic_viscosity_vector(
+    std::vector<double>                        &p_density,
+    const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double>                        &property_vector) = 0;
+ 
+
+  /**
    * @brief Calculates the kinematic viscosity used in PSPG and SUPG stabilization terms.
    * @param[in] field_values Value of the various fields on which the property
    * may depend.
@@ -166,6 +180,22 @@ public:
   {
     get_dynamic_viscosity_vector(p_density_ref, field_vectors, property_vector);
   }
+
+  /**
+   * @brief Calculates the vector values of the dynamic viscosity used in PSPG and SUPG stabilization terms.
+   * @param[in] p_density_ref The density of the fluid at the reference state
+   * @param[in] field_vectors Value of the fields on which the property may
+   * depend on.
+   * @param[out] property_vector Vector of computed viscosities.
+   */
+  virtual void
+  get_dynamic_viscosity_for_stabilization_vector(
+    std::vector<double>                        &p_density,
+    const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double>                        &property_vector)
+  {
+    get_dynamic_viscosity_vector(p_density, field_vectors, property_vector);
+  }  
 
   /**
    * @brief is_non_newtonian_rheological_model Returns a boolean indicating if
@@ -340,6 +370,26 @@ public:
     std::ranges::fill(property_vector, dynamic_viscosity);
   }
 
+  /**
+   * @brief Calculates the vector values of the dynamic viscosity.
+   * @param p_density The density of the fluid. This
+   * value is not needed if the model has a constant kinematic viscosity, since
+   * it implies a constant dynamic viscosity also. The value of the dynamic
+   * viscosity needs to be set with "set_dynamic_viscosity(density_ref)"
+   * before calling this function.
+   * @param field_vectors Values of the field on which the dynamic viscosity may
+   * depend on. These are not used for the constant kinematic viscosity.
+   * @param property_vector Vector of the value of the dynamic viscosity.
+   */
+  void
+  get_dynamic_viscosity_vector(
+    [[maybe_unused]] std::vector<double>                        &p_density,
+    [[maybe_unused]] const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double> &property_vector) override
+  {
+    std::ranges::fill(property_vector, dynamic_viscosity);
+  }
+
 private:
   double kinematic_viscosity;
   double dynamic_viscosity;
@@ -493,6 +543,29 @@ public:
     for (unsigned int i = 0; i < property_vector.size(); ++i)
       property_vector[i] =
         calculate_kinematic_viscosity(shear_rate_magnitude[i]) * p_density_ref;
+  }
+
+  /**
+   * @brief Calculates the vector values of the dynamic viscosity.
+   * @param p_density_ref The density of the fluid at the reference state
+   * @param field_vectors Values of the field on which the dynamic viscosity may
+   * depend on.
+   * @param property_vector
+   */
+  void
+  get_dynamic_viscosity_vector(
+    std::vector<double>                        &p_density,
+    const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double>                        &property_vector) override
+  {
+    Assert(field_vectors.contains(field::shear_rate),
+           PhysicialPropertyModelFieldUndefined("PowerLaw", "shear_rate"));
+    const std::vector<double> &shear_rate_magnitude =
+      field_vectors.at(field::shear_rate);
+
+    for (unsigned int i = 0; i < property_vector.size(); ++i)
+      property_vector[i] =
+        calculate_kinematic_viscosity(shear_rate_magnitude[i]) * p_density[i];
   }
 
 private:
@@ -663,6 +736,29 @@ public:
         calculate_kinematic_viscosity(shear_rate_magnitude[i]) * p_density_ref;
   }
 
+  /**
+   * @brief Calculates the vector values of the dynamic viscosity.
+   * @param p_density_ref The density of the fluid at the reference state
+   * @param field_vectors Values of the field on which the dynamic viscosity may
+   * depend on.
+   * @param property_vector
+   */
+  void
+  get_dynamic_viscosity_vector(
+    std::vector<double>                        &p_density,
+    const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double>                        &property_vector) override
+  {
+    Assert(field_vectors.contains(field::shear_rate),
+           PhysicialPropertyModelFieldUndefined("Carreau", "shear_rate"));
+    const std::vector<double> &shear_rate_magnitude =
+      field_vectors.at(field::shear_rate);
+
+    for (unsigned int i = 0; i < property_vector.size(); ++i)
+      property_vector[i] =
+        calculate_kinematic_viscosity(shear_rate_magnitude[i]) * p_density[i];
+  }
+
 private:
   inline double
   calculate_kinematic_viscosity(const double shear_rate_magnitude) const
@@ -815,6 +911,29 @@ public:
   }
 
   /**
+   * @brief Calculates the vector values of the dynamic viscosity.
+   * @param p_density_ref The density of the fluid at the reference state
+   * @param field_vectors Values of the field on which the dynamic viscosity may
+   * depend on.
+   * @param property_vector
+   */
+  void
+  get_dynamic_viscosity_vector(
+    std::vector<double>                        &p_density,
+    const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double>                        &property_vector) override
+  {
+    Assert(field_vectors.contains(field::temperature),
+           PhysicialPropertyModelFieldUndefined("PhaseChangeRheology",
+                                                "temperature"));
+    const std::vector<double> &temperature =
+      field_vectors.at(field::temperature);
+
+    for (unsigned int i = 0; i < property_vector.size(); ++i)
+      property_vector[i] = kinematic_viscosity(temperature[i]) * p_density[i];
+  }
+
+  /**
    * @brief Calculates the kinematic viscosity used in PSPG and SUPG stabilization terms.
    * @param[in] field_values Value of the various fields on which the property
    * may depend.
@@ -855,6 +974,20 @@ public:
   virtual void
   get_dynamic_viscosity_for_stabilization_vector(
     const double                                                &p_density_ref,
+    [[maybe_unused]] const std::map<field, std::vector<double>> &field_vectors,
+    std::vector<double> &property_vector) override;
+
+
+  /**
+   * @brief Calculates the vector values of the dynamic viscosity used in PSPG and SUPG stabilization terms.
+   * @param[in] p_density_ref The density of the fluid at the reference state
+   * @param[in] field_vectors Value of the fields on which the property may
+   * depend on.
+   * @param[out] property_vector Vector of computed viscosities.
+   */
+  virtual void
+  get_dynamic_viscosity_for_stabilization_vector(
+    std::vector<double>                                         &p_density,
     [[maybe_unused]] const std::map<field, std::vector<double>> &field_vectors,
     std::vector<double> &property_vector) override;
 

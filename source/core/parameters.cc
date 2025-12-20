@@ -558,14 +558,6 @@ namespace Parameters
         Patterns::Double(),
         "Absolute temperature of the gas in kelvin (K) for isothermal ideal gas equation of state in density calculation");
     }
-    prm.enter_subsection("ideal_gas");
-    {
-      prm.declare_entry(
-        "R",
-        "287.05", // dry air's specific gas constant as default
-        Patterns::Double(),
-        "Specific gas constant in SI units for ideal gas equation of state in density calculation");
-    }
     prm.leave_subsection();
   }
 
@@ -595,16 +587,6 @@ namespace Parameters
     void
   IdealGasDensityParameters::declare_parameters(ParameterHandler &prm)
   {
-    prm.enter_subsection("ideal_gas");
-    {
-
-      prm.declare_entry(
-        "R",
-        "287.05", // dry air's specific gas constant as default
-        Patterns::Double(),
-        "Specific gas constant in SI units for isothermal ideal gas equation of state in density calculation");
-
-    }
     prm.enter_subsection("ideal_gas");
     {
       prm.declare_entry(

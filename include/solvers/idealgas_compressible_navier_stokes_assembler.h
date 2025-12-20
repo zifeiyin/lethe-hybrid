@@ -12,7 +12,7 @@
 
 
 /**
- * @brief Class that assembles the core of the isothermal compressible Navier-Stokes equations.
+ * @brief Class that assembles the core of the ideal gas compressible Navier-Stokes equations.
  *  According to the following weak form:
  * \f$\nabla \cdot (\rho \mathbf{u}) + \rho \mathbf{u} \cdot \nabla \mathbf{u} -
  * \nabla p - \mu \nabla^2 \mathbf{u} = 0\f$ with a full GLS stabilization
@@ -57,7 +57,7 @@ public:
 
 /**
  * @brief Class that assembles the transient time arising from BDF time
- * integration for the isothermal compressible Navier Stokes equations. For
+ * integration for the idealgas compressible Navier Stokes equations. For
  * example, if a BDF1 scheme is chosen, the following is assembled
  * \f$\frac{(\rho \mathbf{u})^{t+\Delta t}-(\rho \mathbf{u})^{t}}{\Delta t} +
  * \frac{(\psi \mathbf{p})^{t+\Delta t}-(\psi \mathbf{p})^{t}}{\Delta t} \f$

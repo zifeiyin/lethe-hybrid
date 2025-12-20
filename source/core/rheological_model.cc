@@ -262,3 +262,20 @@ PhaseChangeRheology::get_dynamic_viscosity_for_stabilization_vector(
   std::ranges::fill(property_vector,
                     param.kinematic_viscosity_l * p_density_ref);
 }
+
+/**
+ * @brief Calculates the vector values of the dynamic viscosity used in PSPG and SUPG stabilizations.
+ * @param[in] p_density_ref The density of the fluid at the reference state
+ * @param[in] field_vectors Value of the fields on which the property may
+ * depend on.
+ * @param[out] property_vector Vector of computed viscosities.
+ */
+void
+PhaseChangeRheology::get_dynamic_viscosity_for_stabilization_vector(
+  std::vector<double>                                          &p_density_ref,
+  [[maybe_unused]] const std::map<field, std::vector<double>> &field_vectors,
+  std::vector<double>                                         &property_vector)
+{
+  for (unsigned int i = 0; i < property_vector.size(); ++i)
+    property_vector[i] = param.kinematic_viscosity_l * p_density_ref[i];
+}

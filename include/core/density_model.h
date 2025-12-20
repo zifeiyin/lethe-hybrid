@@ -55,9 +55,35 @@ public:
     return constant_density_model;
   }
 
+  /**
+   * @brief Check if the model is a constant isothermal ideal gas density model.
+   *
+   * @return Boolean indicating if the model corresponds to a constant
+   * isothermal ideal gas density model.
+   */
+  bool
+  is_isothermal_idealgas_density_model() const
+  {
+    return isothermal_idealgas_density_model;
+  }
+
+  /**
+   * @brief Check if the model is a constant ideal gas density model.
+   *
+   * @return Boolean indicating if the model corresponds to a constant
+   * ideal gas density model.
+   */
+  bool
+  is_idealgas_density_model() const
+  {
+    return idealgas_density_model;
+  }
+
 protected:
   /// Boolean indicating if the model corresponds to a constant density model
   bool constant_density_model = false;
+  bool isothermal_idealgas_density_model = false;
+  bool idealgas_density_model = false;
 };
 
 
@@ -239,6 +265,7 @@ public:
     , psi(1. / (p_R * p_T))
   {
     this->model_depends_on[field::pressure] = true;
+    isothermal_idealgas_density_model = true;
   }
 
   /**
@@ -384,6 +411,7 @@ public:
   {
     this->model_depends_on[field::pressure] = true;
     this->model_depends_on[field::temperature] = true;
+    idealgas_density_model = true;
   }
 
   /**

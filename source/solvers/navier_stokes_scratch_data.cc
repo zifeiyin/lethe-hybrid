@@ -514,7 +514,7 @@ NavierStokesScratchData<dim>::calculate_physical_properties()
           kinematic_viscosity_scale =
             rheology_model->get_kinematic_viscosity_scale();
 
-          if (!properties_manager.density_is_constant())
+          if (properties_manager.density_is_isothermal_idealgas())
             {
               // For a weakly compressible flow, density variations will play a
               // role
@@ -529,7 +529,19 @@ NavierStokesScratchData<dim>::calculate_physical_properties()
               rheology_model->get_dynamic_viscosity_for_stabilization_vector(
                 density_ref, fields, dynamic_viscosity_for_stabilization);
             }
-          else
+          else if ( properties_manager.density_is_idealgas())
+            {
+              // For a compressible flow, density variations will play a role
+              const auto density_model = properties_manager.get_density();
+              density_model->vector_value(fields, density);
+              // Dynamic viscosity is also necessary for compressible flows
+              rheology_model->get_dynamic_viscosity_vector(density,
+                                                           fields,
+                                                           dynamic_viscosity);
+              rheology_model->get_dynamic_viscosity_for_stabilization_vector(
+                density, fields, dynamic_viscosity_for_stabilization);
+            }
+          else if (properties_manager.density_is_constant())
             {
               density_scale = properties_manager.get_density_scale();
             }
@@ -639,7 +651,7 @@ NavierStokesScratchData<dim>::calculate_physical_properties()
                 }
 
               // Gather density_psi for isothermal compressible NS equations
-              if (!properties_manager.density_is_constant())
+              if (properties_manager.density_is_isothermal_idealgas())
                 {
                   density_psi_0 = density_model_0->get_psi();
                   density_psi_1 = density_model_1->get_psi();
@@ -654,6 +666,19 @@ NavierStokesScratchData<dim>::calculate_physical_properties()
                           (density_0[q] / density_1[q] * density_psi_1 -
                            density_psi_0) +
                         density_psi_0;
+                    }
+                }
+              else if ( properties_manager.density_is_idealgas())
+                {
+                  for (unsigned int q = 0; q < this->n_q_points; ++q)
+                    {
+                      double filtered_phase_value =
+                        this->filtered_phase_values[q];
+                      // To avoid calculating twice in the assemblers
+                      compressibility_multiplier[q] =
+                        filtered_phase_value *
+                          (density_0[q] / density_1[q]) +
+                        (1 - filtered_phase_value);
                     }
                 }
 

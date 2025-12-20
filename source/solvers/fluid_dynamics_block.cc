@@ -9,6 +9,7 @@
 
 #include <solvers/fluid_dynamics_block.h>
 #include <solvers/isothermal_compressible_navier_stokes_vof_assembler.h>
+#include <solvers/idealgas_compressible_navier_stokes_vof_assembler.h>
 #include <solvers/navier_stokes_assemblers.h>
 #include <solvers/navier_stokes_vof_assemblers.h>
 
@@ -75,13 +76,25 @@ FluidDynamicsBlock<dim>::setup_assemblers()
               this->simulation_control));
         }
       else if (time_stepping_is_bdf(
-                 this->simulation_control->get_assembly_method()))
+                 this->simulation_control->get_assembly_method()) &&
+          this->simulation_parameters.physical_properties_manager
+            .density_is_isothermal_idealgas())
         {
           this->assemblers.emplace_back(
             std::make_shared<
               GLSIsothermalCompressibleNavierStokesVOFAssemblerBDF<dim>>(
               this->simulation_control));
         }
+      else if (time_stepping_is_bdf(
+                 this->simulation_control->get_assembly_method()) &&
+              this->simulation_parameters.physical_properties_manager
+                .density_is_idealgas())
+      {
+        this->assemblers.emplace_back(
+            std::make_shared<
+              GLSIsothermalCompressibleNavierStokesVOFAssemblerBDF<dim>>(
+              this->simulation_control));
+      }
 
       // Darcy force for phase change simulations
       if (this->simulation_parameters.velocity_sources.darcy_type ==
@@ -95,19 +108,28 @@ FluidDynamicsBlock<dim>::setup_assemblers()
                 .get_phase_change_parameters_vector()));
         }
 
-      if (!this->simulation_parameters.physical_properties_manager
+      if (this->simulation_parameters.physical_properties_manager
              .density_is_constant())
-        {
-          this->assemblers.emplace_back(
-            std::make_shared<
-              GLSIsothermalCompressibleNavierStokesVOFAssemblerCore<dim>>(
-              this->simulation_control, this->simulation_parameters));
-        }
-      else
         {
           // Core assembler
           this->assemblers.emplace_back(
             std::make_shared<GLSNavierStokesVOFAssemblerCore<dim>>(
+              this->simulation_control, this->simulation_parameters));
+        }
+      else if (this->simulation_parameters.physical_properties_manager
+             .density_is_isothermal_idealgas())
+        {
+          // Core assembler
+          this->assemblers.emplace_back(
+            std::make_shared<GLSIsothermalCompressibleNavierStokesVOFAssemblerCore<dim>>(
+              this->simulation_control, this->simulation_parameters));
+        }
+      else if (this->simulation_parameters.physical_properties_manager
+             .density_is_idealgas())
+        {
+          this->assemblers.emplace_back(
+            std::make_shared<
+              GLSIdealGasCompressibleNavierStokesVOFAssemblerCore<dim>>(
               this->simulation_control, this->simulation_parameters));
         }
     }
