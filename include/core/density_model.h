@@ -487,6 +487,7 @@ public:
     else if (id == field::temperature)
     {
       const double pressure = field_values.at(field::pressure);
+      const double temperature = field_values.at(field::temperature);
       return -psi * pressure / (temperature * temperature);
     }
     else

@@ -88,3 +88,4 @@ platform/bin/lethe-parameter-check
 platform/bin/lethe-particles
 platform/bin/lethe-particles-ray-tracing
 platform/bin/navier_stokes_parameter_template
+autoInstall.sh
